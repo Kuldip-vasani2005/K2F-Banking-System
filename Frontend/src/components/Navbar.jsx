@@ -52,7 +52,7 @@ const Navbar = () => {
       try {
         const userData = JSON.parse(sessionStorage.getItem("user") || "null");
         const adminData = JSON.parse(
-          localStorage.getItem("adminData") || "null"
+          sessionStorage.getItem("adminData") || "null"
         ); // admin optional
         const token = sessionStorage.getItem("token");
 
@@ -200,8 +200,8 @@ const Navbar = () => {
     try {
       if (user?.isAdmin) {
         await API.post("/admin/auth/logout");
-        localStorage.removeItem("adminData");
-        localStorage.removeItem("adminToken");
+        sessionStorage.removeItem("adminData");
+        sessionStorage.removeItem("adminToken");
       } else {
         await userAPI.logout();
         sessionStorage.removeItem("token");
@@ -218,7 +218,7 @@ const Navbar = () => {
       console.error("Logout failed:", error);
       // Force logout even if API fails
       sessionStorage.clear();
-      localStorage.removeItem("adminData"); // optional
+      sessionStorage.removeItem("adminData"); // optional
 
       navigate("/login");
     }
