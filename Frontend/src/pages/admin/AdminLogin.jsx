@@ -138,13 +138,13 @@ const AdminLogin = () => {
             console.log('Login response:', response.data);
 
             if (response.data.success) {
-                localStorage.setItem('adminData', JSON.stringify({
+                sessionStorage.setItem('adminData', JSON.stringify({
                     ...response.data.admin,
                     token: true,
                     loginTime: new Date().toISOString()
                 }));
 
-                localStorage.setItem('adminRole', response.data.admin.role);
+                sessionStorage.setItem('adminRole', response.data.admin.role);
                 
                 const role = response.data.admin.role;
                 switch(role) {
