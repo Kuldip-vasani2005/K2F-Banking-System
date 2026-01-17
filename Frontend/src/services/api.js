@@ -1,25 +1,29 @@
-// Frontend/src/services/api.js - UPDATED with deleteApplication method
+// Frontend/src/services/api.js
 import axios from "axios";
 
+/**
+ * Base API instance
+ * Uses environment variable for production & local both
+ */
 const API = axios.create({
-  baseURL: "http://localhost:5000",
+  baseURL: import.meta.env.VITE_API_URL, // ✅ PRODUCTION SAFE
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
   },
 });
 
-// Request interceptor for logging
+/* ============================
+   REQUEST INTERCEPTOR
+============================ */
 API.interceptors.request.use(
   (config) => {
     console.log(
-      `API Request: ${config.method.toUpperCase()} ${config.baseURL}${
-        config.url
-      }`
+      `API Request: ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`
     );
 
-    // Check if it's an admin route
-    if (config.url.includes("/admin/")) {
+    // Admin auth handling
+    if (config.url?.includes("/admin/")) {
       const adminData = JSON.parse(sessionStorage.getItem("adminData") || "{}");
 
       if (adminData?.token) {
@@ -39,7 +43,9 @@ API.interceptors.request.use(
   }
 );
 
-// Response interceptor with better logging
+/* ============================
+   RESPONSE INTERCEPTOR
+============================ */
 API.interceptors.response.use(
   (response) => {
     console.log(`API Response: ${response.status} ${response.config.url}`);
@@ -61,8 +67,9 @@ API.interceptors.response.use(
         case 429:
           error.message = "Too many requests. Please wait.";
           break;
+
         case 401:
-          if (error.config.url.includes("/admin/")) {
+          if (error.config?.url?.includes("/admin/")) {
             sessionStorage.removeItem("adminData");
             if (window.location.pathname !== "/admin/login") {
               window.location.href = "/admin/login";
@@ -75,16 +82,19 @@ API.interceptors.response.use(
             }
           }
           break;
+
         case 403:
           error.message = "Access denied.";
-          if (error.config.url.includes("/admin/")) {
+          if (error.config?.url?.includes("/admin/")) {
             sessionStorage.removeItem("adminData");
             window.location.href = "/admin/login";
           }
           break;
+
         case 404:
           error.message = `Endpoint not found: ${error.config.url}`;
           break;
+
         case 500:
           error.message = "Server error. Please try again later.";
           break;
@@ -97,7 +107,9 @@ API.interceptors.response.use(
   }
 );
 
-// ========== AUTH APIs ==========
+/* ============================
+   AUTH APIs
+============================ */
 export const authAPI = {
   signup: (data) => API.post("/auth/signup", data),
   verifyOtp: (data) => API.post("/auth/signup/verify-otp", data),
@@ -110,85 +122,71 @@ export const authAPI = {
     API.post("/auth/forget-password/resend-otp", data),
 };
 
-// ========== USER APIs ==========
+/* ============================
+   USER APIs
+============================ */
 export const userAPI = {
   getProfile: () => API.get("/user/me"),
   updatePassword: (data) => API.post("/user/update-password", data),
   logout: () => API.post("/user/logout"),
 };
 
-// ========== APPLICATION APIs ==========
+/* ============================
+   APPLICATION APIs
+============================ */
 export const applicationAPI = {
-  // Start application with account type
-  startApplication: (data) => {
-    return API.post("/user/application/start", data);
-  },
+  startApplication: (data) => API.post("/user/application/start", data),
 
-  // Update personal info - using PUT
-  updatePersonalInfo: (applicationId, data) => {
-    return API.put(`/user/application/${applicationId}/personal-info`, data);
-  },
+  updatePersonalInfo: (id, data) =>
+    API.put(`/user/application/${id}/personal-info`, data),
 
-  // Update identity info - using PUT
-  updateIdentityInfo: (applicationId, data) => {
-    return API.put(`/user/application/${applicationId}/identity-info`, data);
-  },
+  updateIdentityInfo: (id, data) =>
+    API.put(`/user/application/${id}/identity-info`, data),
 
-  // Verify OTP
-  verifyApplicationOtp: (applicationId, otp) => {
-    return API.post(`/user/application/${applicationId}/verify-otp`, { otp });
-  },
+  verifyApplicationOtp: (id, otp) =>
+    API.post(`/user/application/${id}/verify-otp`, { otp }),
 
-  // Resend OTP
-  resendApplicationOtp: (applicationId) => {
-    return API.post(`/user/application/${applicationId}/resend-otp`);
-  },
+  resendApplicationOtp: (id) =>
+    API.post(`/user/application/${id}/resend-otp`),
 
-  // Create bank account after verification
-  createBankAccount: (applicationId) => {
-    return API.post(`/user/application/${applicationId}/create-account`);
-  },
+  createBankAccount: (id) =>
+    API.post(`/user/application/${id}/create-account`),
 
-  // Get all applications for user
-  getUserApplications: () => {
-    return API.get("/user/application");
-  },
+  getUserApplications: () => API.get("/user/application"),
 
-  // DELETE APPLICATION METHOD - ADDED THIS
-  deleteApplication: (applicationId) => {
-    return API.delete(`/user/application/${applicationId}`);
-  },
+  getApplicationStatus: (id) =>
+    API.get(`/user/application/${id}/status`),
 
-  // Get application status
-  getApplicationStatus: (applicationId) => {
-    return API.get(`/user/application/${applicationId}/status`);
-  },
+  getApplicationById: (id) =>
+    API.get(`/user/application/${id}`),
 
-  // Get single application details
-  getApplicationById: (applicationId) => {
-    return API.get(`/user/application/${applicationId}`);
-  },
+  deleteApplication: (id) =>
+    API.delete(`/user/application/${id}`),
 };
 
-// ========== BANK ACCOUNT APIs ==========
+/* ============================
+   BANK ACCOUNT APIs
+============================ */
 export const bankAccountAPI = {
   getMyAccounts: () => API.get("/user/account/my-accounts"),
-  getAccountDetails: (accountId) => API.get(`/user/account/${accountId}`),
+  getAccountDetails: (id) => API.get(`/user/account/${id}`),
   transferMoney: (data) => API.post("/user/account/transfer", data),
 
-  getTransactions: (accountId) =>
-    API.get(`/user/account/${accountId}/transactions`),
+  getTransactions: (id) =>
+    API.get(`/user/account/${id}/transactions`),
 
-  getRecentTransactions: () => API.get("/user/account/transactions/recent"),
+  getRecentTransactions: () =>
+    API.get("/user/account/transactions/recent"),
 
-  // ✅ ADD THIS
-  getAccountStatement: (accountId, startDate, endDate) =>
-    API.get(`/user/account/${accountId}/statement`, {
+  getAccountStatement: (id, startDate, endDate) =>
+    API.get(`/user/account/${id}/statement`, {
       params: { startDate, endDate },
     }),
 };
 
-// ========== CARD APIs ==========
+/* ============================
+   CARD APIs
+============================ */
 export const cardAPI = {
   requestCard: (data) => API.post("/user/card/request", data),
   getCardStatus: () => API.get("/user/card/status"),
@@ -198,7 +196,9 @@ export const cardAPI = {
     API.post("/user/card/unblock-card/verify-otp", data),
 };
 
-// ========== ATM APIs ==========
+/* ============================
+   ATM APIs
+============================ */
 export const atmAPI = {
   setPin: (data) => API.post("/atm/set-pin", data),
   verifyOtp: (data) => API.post("/atm/set-pin/verify-otp", data),
@@ -207,9 +207,10 @@ export const atmAPI = {
   checkBalance: (data) => API.post("/atm/check-balance", data),
 };
 
-// ========== ADMIN APIs ==========
+/* ============================
+   ADMIN APIs
+============================ */
 export const adminAPI = {
-  // Auth
   login: (data) => API.post("/admin/auth/login", data),
   logout: () => API.post("/admin/auth/logout"),
   test: () => API.get("/admin/auth/test"),
@@ -217,25 +218,31 @@ export const adminAPI = {
   // Account Verifier
   getPendingApplications: () =>
     API.get("/admin/account-verifier/applications/pending"),
-  getApplicationDetails: (applicationId) =>
-    API.get(`/admin/account-verifier/applications/${applicationId}`),
-  verifyIdentity: (applicationId) =>
+
+  getApplicationDetails: (id) =>
+    API.get(`/admin/account-verifier/applications/${id}`),
+
+  verifyIdentity: (id) =>
+    API.post(`/admin/account-verifier/applications/${id}/verify-identity`),
+
+  approveApplication: (id) =>
+    API.post(`/admin/account-verifier/applications/${id}/approve`),
+
+  rejectApplication: (id, reason) =>
     API.post(
-      `/admin/account-verifier/applications/${applicationId}/verify-identity`
+      `/admin/account-verifier/applications/${id}/reject`,
+      { reason }
     ),
-  approveApplication: (applicationId) =>
-    API.post(`/admin/account-verifier/applications/${applicationId}/approve`),
-  rejectApplication: (applicationId, reason) =>
-    API.post(`/admin/account-verifier/applications/${applicationId}/reject`, {
-      reason,
-    }),
 
   // Card Manager
-  getPendingCardRequests: () => API.get("/admin/card-manager/pending"),
-  approveCardRequest: (cardRequestId) =>
-    API.post(`/admin/card-manager/${cardRequestId}/approve`),
-  rejectCardRequest: (cardRequestId) =>
-    API.post(`/admin/card-manager/${cardRequestId}/reject`),
+  getPendingCardRequests: () =>
+    API.get("/admin/card-manager/pending"),
+
+  approveCardRequest: (id) =>
+    API.post(`/admin/card-manager/${id}/approve`),
+
+  rejectCardRequest: (id) =>
+    API.post(`/admin/card-manager/${id}/reject`),
 
   // Cashier
   depositMoney: (data) => API.post("/admin/cashier/deposit", data),
@@ -244,9 +251,11 @@ export const adminAPI = {
   // Super Admin
   getAllAdmins: () => API.get("/admin/super-admin/list"),
   createAdmin: (data) => API.post("/admin/super-admin/create", data),
-  toggleAdminStatus: (adminId) =>
-    API.put(`/admin/super-admin/toggle/${adminId}`),
+  toggleAdminStatus: (id) =>
+    API.put(`/admin/super-admin/toggle/${id}`),
 };
 
-// Default export
+/* ============================
+   DEFAULT EXPORT
+============================ */
 export default API;
