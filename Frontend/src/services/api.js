@@ -20,7 +20,7 @@ API.interceptors.request.use(
 
     // Check if it's an admin route
     if (config.url.includes("/admin/")) {
-      const adminData = JSON.parse(localStorage.getItem("adminData") || "{}");
+      const adminData = JSON.parse(sessionStorage.getItem("adminData") || "{}");
 
       if (adminData?.token) {
         config.headers.Authorization = `Bearer ${adminData.token}`;
@@ -63,13 +63,13 @@ API.interceptors.response.use(
           break;
         case 401:
           if (error.config.url.includes("/admin/")) {
-            localStorage.removeItem("adminData");
+            sessionStorage.removeItem("adminData");
             if (window.location.pathname !== "/admin/login") {
               window.location.href = "/admin/login";
             }
           } else {
-            localStorage.removeItem("token");
-            localStorage.removeItem("user");
+            sessionStorage.removeItem("token");
+            sessionStorage.removeItem("user");
             if (window.location.pathname !== "/login") {
               window.location.href = "/login";
             }
@@ -78,7 +78,7 @@ API.interceptors.response.use(
         case 403:
           error.message = "Access denied.";
           if (error.config.url.includes("/admin/")) {
-            localStorage.removeItem("adminData");
+            sessionStorage.removeItem("adminData");
             window.location.href = "/admin/login";
           }
           break;

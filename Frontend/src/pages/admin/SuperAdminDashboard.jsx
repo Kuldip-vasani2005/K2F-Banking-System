@@ -91,7 +91,7 @@ const SuperAdminDashboard = () => {
   const [threatsDetected, setThreatsDetected] = useState(0);
   const navigate = useNavigate();
 
-  const adminData = JSON.parse(localStorage.getItem("adminData") || "{}");
+  const adminData = JSON.parse(sessionStorage.getItem("adminData") || "{}");
 
   // Sound effects simulation
   const playSound = (soundType) => {
@@ -196,7 +196,7 @@ const SuperAdminDashboard = () => {
       });
 
       if (response.status === 401) {
-        localStorage.removeItem("adminData");
+        sessionStorage.removeItem("adminData");
         navigate("/admin/login");
         toast.error("🔒 SESSION TERMINATED - Re-authentication required");
         return;
@@ -295,12 +295,12 @@ const SuperAdminDashboard = () => {
         method: "POST",
         credentials: "include",
       });
-      localStorage.removeItem("adminData");
+      sessionStorage.removeItem("adminData");
       navigate("/admin/login");
       toast.success("🔓 SECURE DISENGAGEMENT COMPLETE");
     } catch (error) {
       console.error("❌ EMERGENCY LOGOUT:", error);
-      localStorage.removeItem("adminData");
+      sessionStorage.removeItem("adminData");
       navigate("/admin/login");
     }
   };
@@ -359,7 +359,7 @@ const SuperAdminDashboard = () => {
       const responseText = await response.text();
 
       if (response.status === 401) {
-        localStorage.removeItem("adminData");
+        sessionStorage.removeItem("adminData");
         navigate("/admin/login");
         toast.error("🔒 SESSION COMPROMISED - Re-authenticate immediately");
         return;
@@ -443,7 +443,7 @@ const SuperAdminDashboard = () => {
       const responseText = await response.text();
 
       if (response.status === 401) {
-        localStorage.removeItem("adminData");
+        sessionStorage.removeItem("adminData");
         navigate("/admin/login");
         toast.error("🔒 SESSION TERMINATED");
         return;

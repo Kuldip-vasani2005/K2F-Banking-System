@@ -38,7 +38,7 @@ const CashierDashboard = () => {
   });
   const navigate = useNavigate();
 
-  const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
+  const adminData = JSON.parse(sessionStorage.getItem('adminData') || '{}');
 
   // Sound effects for dangerous actions
   const playSound = (soundType) => {
@@ -248,7 +248,7 @@ const CashierDashboard = () => {
     
     try {
       await api.post('/admin/logout');
-      localStorage.removeItem('adminData');
+      sessionStorage.removeItem('adminData');
       navigate('/admin/login');
     } catch (error) {
       console.error('❌ LOGOUT FAILURE:', error);

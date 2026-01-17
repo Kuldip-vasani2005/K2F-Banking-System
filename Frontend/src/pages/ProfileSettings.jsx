@@ -183,15 +183,15 @@ const ProfileSettings = () => {
         setUser(updatedUser);
         addAlert("success", "Profile updated successfully!");
 
-        // Update localStorage
-        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        // Update sessionStorage
+        const storedUser = JSON.parse(sessionStorage.getItem("user") || "{}");
         const newUserData = {
           ...storedUser,
           fullName: updatedUser.fullName,
           mobile: updatedUser.mobile,
           email: updatedUser.email,
         };
-        localStorage.setItem("user", JSON.stringify(newUserData));
+        sessionStorage.setItem("user", JSON.stringify(newUserData));
 
         // Dispatch event to update navbar
         window.dispatchEvent(
@@ -227,8 +227,8 @@ const ProfileSettings = () => {
 
         addAlert("success", "Profile photo removed successfully!");
 
-        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-        localStorage.setItem(
+        const storedUser = JSON.parse(sessionStorage.getItem("user") || "{}");
+        sessionStorage.setItem(
           "user",
           JSON.stringify({ ...storedUser, profilePhoto: null })
         );
@@ -352,13 +352,13 @@ const ProfileSettings = () => {
 
         addAlert("success", "Profile photo updated successfully!");
 
-        // Update localStorage
-        const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
+        // Update sessionStorage
+        const storedUser = JSON.parse(sessionStorage.getItem("user") || "{}");
         const newUserData = {
           ...storedUser,
           profilePhoto: response.data.profilePhoto,
         };
-        localStorage.setItem("user", JSON.stringify(newUserData));
+        sessionStorage.setItem("user", JSON.stringify(newUserData));
 
         // Dispatch event to update navbar
         window.dispatchEvent(

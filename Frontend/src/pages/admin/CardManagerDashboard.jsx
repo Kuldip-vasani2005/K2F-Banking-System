@@ -28,7 +28,7 @@ const CardManagerDashboard = () => {
   });
   const navigate = useNavigate();
 
-  const adminData = JSON.parse(localStorage.getItem('adminData') || '{}');
+  const adminData = JSON.parse(sessionStorage.getItem('adminData') || '{}');
 
   // Fetch pending card requests
   const fetchPendingRequests = async () => {
@@ -125,7 +125,7 @@ const CardManagerDashboard = () => {
   const handleLogout = async () => {
     try {
       await api.post('/admin/logout');
-      localStorage.removeItem('adminData');
+      sessionStorage.removeItem('adminData');
       navigate('/admin/login');
     } catch (error) {
       console.error('❌ LOGOUT FAILURE:', error);

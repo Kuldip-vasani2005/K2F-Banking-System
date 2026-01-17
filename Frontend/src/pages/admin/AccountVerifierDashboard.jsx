@@ -192,7 +192,7 @@ const AccountVerifierDashboard = () => {
     const handleLogout = async () => {
         try {
             await api.post('/admin/logout');
-            localStorage.removeItem('adminData');
+            sessionStorage.removeItem('adminData');
             navigate('/admin/login');
         } catch (error) {
             console.error('❌ Logout error:', error);
